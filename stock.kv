@@ -135,17 +135,8 @@ WindowManager:
                 spacing: 40
                 GridLayout:
                     id: BL1
-                    cols:1
+                    cols:3
                     spacing: 40 
-                GridLayout:
-                    id: BL2
-                    cols:1
-                    spacing: 40
-                GridLayout:
-                    id: BL3
-                    cols:1
-                    spacing: 40
-            
         BoxLayout:
             size: 240, 120
             size_hint: None, None
@@ -190,21 +181,20 @@ WindowManager:
                     radius: [(40, 40), (40, 40), (40, 40), (40, 40)]
         
         ScrollView:
-            BoxLayout:
-                id:SV
-                orientation:"horizontal"
+            GridLayout:
+                id: GL
+                cols: 4
                 size_hint_y: None
                 spacing: 40
-                Label:
-                    text: "Output lists of item."
+                padding:40
+                canvas.before:
+                    Color:
+                        rgba: 0,0,0,0.8
+                    RoundedRectangle:
+                        pos: self.pos
+                        size: self.size
+                        radius: [(40, 40), (40, 40), (40, 40), (40, 40)]
 
-                    canvas.before:
-                        Color:
-                            rgba: 0,0,0,0.8
-                        RoundedRectangle:
-                            pos: self.pos
-                            size: self.size
-                            radius: [(40, 40), (40, 40), (40, 40), (40, 40)]
             
         BoxLayout:
             size: 240, 120

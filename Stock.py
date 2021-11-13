@@ -2,8 +2,10 @@ import kivy
 import math
 import weakref
 from kivy.app import App
+from kivy.uix.behaviors import button
 from kivy.uix.button import Button
 from kivy.lang.builder import Builder
+from kivy.uix.gridlayout import GridLayout
 from kivy.graphics import RoundedRectangle,Color
 from kivy.uix.label import Label
 from kivy.uix.screenmanager import ScreenManager, Screen
@@ -35,12 +37,7 @@ class AddWindow(Screen):
             # with self.ids[categories[i]].canvas.before:
             #     Color(rgba=(0,0,0,0.3))
             #     RoundedRectangle(size=(1310/3, 190),pos=button.pos, radius = [(40, 40), (40, 40), (40, 40), (40, 40)])
-            if i%3 == 0:
-                self.ids.BL1.add_widget(button)
-            elif i%3 == 1:
-                self.ids.BL2.add_widget(button)
-            else:
-                self.ids.BL3.add_widget(button)
+            self.ids.BL1.add_widget(button)
 
     def pressed(self, instance):
         print("Button on click:", instance.text)
@@ -50,7 +47,22 @@ class AddWindow(Screen):
 
 class CategoriesWindow(Screen):
     def on_kv_post(self, obj):
+        n = math.ceil(50/1)
+        self.ids.GL.height = (40*(n+1)+50*n) # กำหนดช่วงความสูงของ GridLayout ใน ScrollView
+        for i in range(50):
+            label = Label(text="Test Object #"+str(i+1), font_size=24, size_hint_y=None, height=50)
+            amount = Label(text=str(i+1), font_size=24, size_hint_y=None, height=50, size_hint_x=0.1)
+            add = Button(text="+", font_size=48, size_hint_y=None, height=50,size_hint_x=0.1)
+            decrease = Button(text="-", font_size=48, size_hint_y=None, height=50, size_hint_x=0.1)
+            self.ids.GL.add_widget(label)
+            self.ids.GL.add_widget(decrease)
+            self.ids.GL.add_widget(amount)
+            self.ids.GL.add_widget(add)
+    
+    def adder(self, instance):
         pass
+
+
 
 class WindowManager(ScreenManager):
     pass
