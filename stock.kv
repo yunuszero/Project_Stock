@@ -1,0 +1,220 @@
+#:import Factory kivy.factory.Factory
+#:import Button kivy.uix.button.Button
+#:import NoTransition kivy.uix.screenmanager.NoTransition
+
+WindowManager:
+    MainWindow:
+    AddWindow:
+    CategoriesWindow:
+
+# declaration part
+
+<MyPopup@Popup>
+    auto_dissmiss:False
+    title: "Hello"
+    size_hint: 0.6, 0.2
+    pos_hunt: {"x":0.2, "top":0.9}
+
+<GreenButton@Button>
+    color: 0,0,0,1
+    background_color: (1,1,1,0.3)
+    background_normal: ''
+    canvas.before:
+        Color:
+            rgba: 0,255,0,0.3
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [(40, 40), (40, 40), (40, 40), (40, 40)]
+
+<RedButton@Button>
+    color: 0,0,0,1
+    background_color: (1,1,1,0.3)
+    background_normal: ''
+    canvas.before:
+        Color:
+            rgba: 255,0,0,0.3
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [(40, 40), (40, 40), (40, 40), (40, 40)]
+
+# Window details 
+
+<MainWindow>:
+    name: "main"
+    # item: item
+    canvas.before:
+        Color:
+            rgba: 1, 1, 1, 1
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+
+    BoxLayout:
+        orientation:"vertical"
+        padding: 25
+        spacing: 40
+        BoxLayout:
+            orientation:"horizontal"
+            size: 490, 120
+            size_hint: None, None
+            spacing: 50
+            
+            GreenButton:
+                text: "เพิ่มวัตถุดิบ"
+                font_name:'fonts/THSarabun Bold.ttf'
+                font_size:36
+    
+                on_release:
+                    root.manager.transition = NoTransition()
+                    app.root.current = "add"
+            RedButton:
+                text: "ใช้วัตถุดิบ"
+                font_name:'fonts/THSarabun Bold.ttf'
+                font_size:36
+        Label:
+            text: "Output lists of item."
+            canvas.before:
+                Color:
+                    rgba: 0,0,0,0.8
+                RoundedRectangle:
+                    pos: self.pos
+                    size: self.size
+                    radius: [(40, 40), (40, 40), (40, 40), (40, 40)]
+        BoxLayout:
+            orientation:"horizontal"
+            size: 490, 120
+            size_hint: None, None
+            spacing: 50
+
+            GreenButton:
+                text: "เคลียร์วัตถุดิบ"
+                font_name:'fonts/THSarabun Bold.ttf'
+                font_size:36
+            RedButton:
+                text: "ลบวัตถุดิบ"
+                font_name:'fonts/THSarabun Bold.ttf'
+                font_size:36
+
+<AddWindow>:
+    name: "add"
+    canvas.before:
+        Color:
+            rgba: 1, 1, 1, 1
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+    BoxLayout:
+        orientation: "vertical"
+        padding: 25
+        spacing: 40
+        Label:
+            text: "เพิ่มวัตถุดิบ"
+            font_name:'fonts/THSarabun Bold.ttf'
+            font_size:36
+            color: 0,0,0,1
+            size: root.width-50, 120
+            size_hint: None, None
+
+            canvas.before:
+                Color:
+                    rgba: 0, 255, 0, 0.3
+                RoundedRectangle:
+                    pos: self.pos
+                    size: self.size
+                    radius: [(40, 40), (40, 40), (40, 40), (40, 40)]
+        
+        ScrollView:
+            BoxLayout:
+                id:SV
+                orientation:"horizontal"
+                size_hint_y: None
+                spacing: 40
+                GridLayout:
+                    id: BL1
+                    cols:1
+                    spacing: 40 
+                GridLayout:
+                    id: BL2
+                    cols:1
+                    spacing: 40
+                GridLayout:
+                    id: BL3
+                    cols:1
+                    spacing: 40
+            
+        BoxLayout:
+            size: 240, 120
+            size_hint: None, None
+            spacing: 50
+            RedButton:
+                text: "ย้อนกลับ"
+                font_name:'fonts/THSarabun Bold.ttf'
+                font_size:36
+                
+                on_release:
+                    root.manager.transition = NoTransition()
+                    app.root.current = "main"
+
+<CategoriesWindow>
+    name: "categories"
+    canvas.before:
+        Color:
+            rgba: 1, 1, 1, 1
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+    BoxLayout:
+        orientation: "vertical"
+        padding: 25
+        spacing: 40
+        Label:
+            id: titleTXT
+            text: ""
+            font_name:'fonts/THSarabun Bold.ttf'
+            font_size:36
+            color: 0,0,0,1
+            size: root.width-50, 120
+            size_hint: None, None
+
+            canvas.before:
+                Color:
+                    rgba: 0, 255, 0, 0.3
+                RoundedRectangle:
+                    pos: self.pos
+                    size: self.size
+                    radius: [(40, 40), (40, 40), (40, 40), (40, 40)]
+        
+        ScrollView:
+            BoxLayout:
+                id:SV
+                orientation:"horizontal"
+                size_hint_y: None
+                spacing: 40
+                Label:
+                    text: "Output lists of item."
+
+                    canvas.before:
+                        Color:
+                            rgba: 0,0,0,0.8
+                        RoundedRectangle:
+                            pos: self.pos
+                            size: self.size
+                            radius: [(40, 40), (40, 40), (40, 40), (40, 40)]
+            
+        BoxLayout:
+            size: 240, 120
+            size_hint: None, None
+            spacing: 50
+            RedButton:
+                text: "ย้อนกลับ"
+                font_name:'fonts/THSarabun Bold.ttf'
+                font_size:36
+                
+                on_release:
+                    root.manager.transition = NoTransition()
+                    app.root.current = "add"
