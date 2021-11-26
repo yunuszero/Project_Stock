@@ -46,6 +46,7 @@ class AddWindow(Screen):
     def on_kv_post(self, obj):
         n = math.ceil(len(categories)/3)
         self.ids.SV.height = (40*(n-1)+190*(n))
+        # loop create categories BTN.
         for i in range(len(categories)):
             button = Button(text=categories[i], font_name='fonts/THSarabun Bold.ttf', font_size = 36, size_hint_y = None, height = 190)
             button.bind(on_press=self.pressed)
