@@ -220,6 +220,7 @@ WindowManager:
                 font_name:'fonts/THSarabun Bold.ttf'
                 font_size:36
                 size_hint_x: 0.2
+                on_press: root.back()
                 on_release:
                     root.manager.transition = NoTransition()
                     app.root.current = "add"
@@ -276,3 +277,4 @@ WindowManager:
                 font_name:'fonts/THSarabun Bold.ttf'
                 font_size:36
                 size_hint: 0.2, 1
+                on_press: root.adding_item()

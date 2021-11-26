@@ -62,8 +62,7 @@ class AddWindow(Screen):
         self.manager.current = 'categories'
         self.manager.current_screen.ids.titleTXT.text = instance.text
 
-class CategoriesWindow(Screen):
-    def on_kv_post(self, obj):
+        # generate widget.
         items = []
         with open('meat.txt') as reader:
             for line in reader.readlines():
@@ -71,28 +70,58 @@ class CategoriesWindow(Screen):
         for i in range(len(items)):
             items[i] = items[i].split()
         n = math.ceil(len(items)/1)
-        self.ids.GL.height = (40*(n+1)+50*n) # กำหนดช่วงความสูงของ GridLayout ใน ScrollView
+        self.manager.current_screen.ids.GL.height = (40*(n+1)+70*n) # กำหนดช่วงความสูงของ GridLayout ใน ScrollView
         for i in range(len(items)):
-            label = Label(text=items[i][0], font_size=24, size_hint_y=None, height=50)
-            amount = Label(text=str(0), font_size=24, size_hint_y=None, height=50, size_hint_x=0.1)
-            add = Button(text="+", font_size=48, size_hint_y=None, height=50,size_hint_x=0.1)
-            decrease = Button(text="-", font_size=48, size_hint_y=None, height=50, size_hint_x=0.1)
-            clear = Button(text="C", font_name='fonts/THSarabun Bold.ttf', font_size=24, size_hint_y=None, height=50, size_hint_x=0.1)
-            reset = Button(text="R", font_name='fonts/THSarabun Bold.ttf', font_size=24, size_hint_y=None, height=50, size_hint_x=0.1)
-            total = Label(text = items[i][1], font_size=24, size_hint_y=None, height=50, size_hint_x=0.1)
+            label = Label(text=items[i][0], font_size=24, size_hint_y=None, height=70)
+            amount = Label(text=str(0), font_size=24, size_hint_y=None, height=70, size_hint_x=0.1)
+            add = Button(text="+", font_size=48, size_hint_y=None, height=70, size_hint_x=None, width=70)
+            decrease = Button(text="-", font_size=48, size_hint_y=None, height=70, size_hint_x=None, width=70)
+            clear = Button(size_hint_y=None, height=70, size_hint_x=None, width=70, background_normal="bin.png")
+            reset = Button(size_hint_y=None, height=70, size_hint_x=None, width=70, background_normal="reset.png")
+            total = Label(text = items[i][1], font_size=24, size_hint_y=None, height=70, size_hint_x=0.1)
 
             
             # Add widget.
-            self.ids.GL.add_widget(clear)
-            self.ids.GL.add_widget(reset)
-            self.ids.GL.add_widget(label)
-            self.ids.GL.add_widget(decrease)
-            self.ids.GL.add_widget(amount)
-            self.ids.GL.add_widget(add)
-            self.ids.GL.add_widget(total)
+            self.manager.current_screen.ids.GL.add_widget(clear)
+            self.manager.current_screen.ids.GL.add_widget(reset)
+            self.manager.current_screen.ids.GL.add_widget(label)
+            self.manager.current_screen.ids.GL.add_widget(decrease)
+            self.manager.current_screen.ids.GL.add_widget(amount)
+            self.manager.current_screen.ids.GL.add_widget(add)
+            self.manager.current_screen.ids.GL.add_widget(total)
+
+class CategoriesWindow(Screen):
+    def on_kv_post(self, obj):
+        # items = []
+        # with open('meat.txt') as reader:
+        #     for line in reader.readlines():
+        #         items.append(line)
+        # for i in range(len(items)):
+        #     items[i] = items[i].split()
+        # n = math.ceil(len(items)/1)
+        # self.ids.GL.height = (40*(n+1)+50*n) # กำหนดช่วงความสูงของ GridLayout ใน ScrollView
+        # for i in range(len(items)):
+        #     label = Label(text=items[i][0], font_size=24, size_hint_y=None, height=50)
+        #     amount = Label(text=str(0), font_size=24, size_hint_y=None, height=50, size_hint_x=0.1)
+        #     add = Button(text="+", font_size=48, size_hint_y=None, height=50,size_hint_x=0.1)
+        #     decrease = Button(text="-", font_size=48, size_hint_y=None, height=50, size_hint_x=0.1)
+        #     clear = Button(text="C", font_name='fonts/THSarabun Bold.ttf', font_size=24, size_hint_y=None, height=50, size_hint_x=0.1)
+        #     reset = Button(text="R", font_name='fonts/THSarabun Bold.ttf', font_size=24, size_hint_y=None, height=50, size_hint_x=0.1)
+        #     total = Label(text = items[i][1], font_size=24, size_hint_y=None, height=50, size_hint_x=0.1)
+
+            
+        #     # Add widget.
+        #     self.ids.GL.add_widget(clear)
+        #     self.ids.GL.add_widget(reset)
+        #     self.ids.GL.add_widget(label)
+        #     self.ids.GL.add_widget(decrease)
+        #     self.ids.GL.add_widget(amount)
+        #     self.ids.GL.add_widget(add)
+        #     self.ids.GL.add_widget(total)
     
-            self.ids["add"+str(i)] = weakref.ref(add)
-            add.bind(on_press=self.adder)
+        #     self.ids["add"+str(i)] = weakref.ref(add)
+        #     add.bind(on_press=self.adder)
+        pass
 
     def adder(self, instance):
         print(self.get_id(instance))
@@ -102,6 +131,14 @@ class CategoriesWindow(Screen):
         for id, widget in instance.parent.ids.items():
             if widget.__self__ == instance:
                 return id
+
+    def back(self):
+        print("Button on click: back")
+        self.ids.GL.clear_widgets()
+
+    def adding_item(self):
+        print("Coding Here...")
+        
 
 
 class WindowManager(ScreenManager):
