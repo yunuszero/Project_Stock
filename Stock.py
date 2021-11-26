@@ -80,6 +80,7 @@ class CategoriesWindow(Screen):
             clear = Button(text="C", font_name='fonts/THSarabun Bold.ttf', font_size=24, size_hint_y=None, height=50, size_hint_x=0.1)
             reset = Button(text="R", font_name='fonts/THSarabun Bold.ttf', font_size=24, size_hint_y=None, height=50, size_hint_x=0.1)
             total = Label(text = items[i][1], font_size=24, size_hint_y=None, height=50, size_hint_x=0.1)
+
             
             # Add widget.
             self.ids.GL.add_widget(clear)
@@ -90,9 +91,17 @@ class CategoriesWindow(Screen):
             self.ids.GL.add_widget(add)
             self.ids.GL.add_widget(total)
     
-    def adder(self, instance):
-        pass
+            self.ids["add"+str(i)] = weakref.ref(add)
+            add.bind(on_press=self.adder)
 
+    def adder(self, instance):
+        print(self.get_id(instance))
+        
+
+    def get_id(self, instance):
+        for id, widget in instance.parent.ids.items():
+            if widget.__self__ == instance:
+                return id
 
 
 class WindowManager(ScreenManager):
