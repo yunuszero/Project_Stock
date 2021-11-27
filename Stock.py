@@ -1,162 +1,439 @@
-import kivy
-import math
-import weakref
-from kivy.app import App
-from kivy.uix.behaviors import button
-from kivy.uix.button import Button
-from kivy.lang.builder import Builder
-from kivy.uix.gridlayout import GridLayout
-from kivy.graphics import RoundedRectangle,Color
-from kivy.uix.label import Label
-from kivy.uix.screenmanager import ScreenManager, Screen
-from kivy.properties import ObjectProperty
-from kivy.config import Config
-from kivy.utils import interpolate
-Config.set('graphics', 'width', '1440')
-Config.set('graphics', 'height', '1024')
-# Config.set('graphics', 'resizable', False)
+import datetime
+import pickle
 
-categories = ['เนื้อสัตว์','ผัก','อาหารทานเล่น','เครื่องดื่ม','ผลไม้','น้ำซุป','ของหวาน', 'น้ำจิ้ม','อื่นๆ', 'New']
+class LinkedList:
+    class Node :
+        def __init__(self,data,next = None) :
+            self.data = data
+            if next is None :
+                self.next = None
+            else :
+                self.next = next
+                
+        def __str__(self) :
+            return str(self.data)
 
-ref_dict={}
-
-class Materials:
-
-    def __init__(self):
-        self.name = ''
-        self.amount = 0
-        self.expire = 0.0
-
-    def setName(self, name):
-        self.name = name
-
-    def setAmount (self, amount):
-        self.amount = amount
-
-    def setExpire(self, expire):
-        self.expire = expire
-
-class MainWindow(Screen):
-    item = ObjectProperty(None)
-
-    def Btn(self):
-        print("Search: ",self.item.text)
-    pass
-
-class AddWindow(Screen):
-    def on_kv_post(self, obj):
-        n = math.ceil(len(categories)/3)
-        self.ids.SV.height = (40*(n-1)+190*(n))
-        # loop create categories BTN.
-        for i in range(len(categories)):
-            button = Button(text=categories[i], font_name='fonts/THSarabun Bold.ttf', font_size = 36, size_hint_y = None, height = 190)
-            button.bind(on_press=self.pressed)
-            self.ids[categories[i]] = weakref.ref(button)
-            # with self.ids[categories[i]].canvas.before:
-            #     Color(rgba=(0,0,0,0.3))
-            #     RoundedRectangle(size=(1310/3, 190),pos=button.pos, radius = [(40, 40), (40, 40), (40, 40), (40, 40)])
-            self.ids.BL1.add_widget(button)
-
-    def pressed(self, instance):
-        print("Button on click:", instance.text)
-        # print(instance.text)
-        self.manager.current = 'categories'
-        self.manager.current_screen.ids.titleTXT.text = instance.text
-
-        # generate widget.
-        items = []
-        with open('meat.txt') as reader:
-            for line in reader.readlines():
-                items.append(line)
-        for i in range(len(items)):
-            items[i] = items[i].split()
-        n = math.ceil(len(items)/1)
-        self.manager.current_screen.ids.GL.height = (40*(n+1)+70*n) # กำหนดช่วงความสูงของ GridLayout ใน ScrollView
-        for i in range(len(items)):
-            label = Label(text=items[i][0], font_size=24, size_hint_y=None, height=70)
-            amount = Label(text=str(0), font_size=24, size_hint_y=None, height=70, size_hint_x=0.1)
-            add = Button(text="+", font_size=48, size_hint_y=None, height=70, size_hint_x=None, width=70)
-            decrease = Button(text="-", font_size=48, size_hint_y=None, height=70, size_hint_x=None, width=70)
-            clear = Button(size_hint_y=None, height=70, size_hint_x=None, width=70, background_normal="bin.png")
-            reset = Button(size_hint_y=None, height=70, size_hint_x=None, width=70, background_normal="reset.png")
-            total = Label(text = items[i][1], font_size=24, size_hint_y=None, height=70, size_hint_x=0.1)
-
+    def __init__(self,head = None):
+        if head == None:
+                self.head = self.tail = None
+                self.size = 0
+        else:
+            self.head = head
+            t = self.head        
+            self.size = 1
+            while t.next != None :
+                t = t.next 
+                self.size += 1
+            self.tail = t
             
-            # Add widget.
-            self.manager.current_screen.ids.GL.add_widget(clear)
-            self.manager.current_screen.ids.GL.add_widget(reset)
-            self.manager.current_screen.ids.GL.add_widget(label)
-            self.manager.current_screen.ids.GL.add_widget(decrease)
-            self.manager.current_screen.ids.GL.add_widget(amount)
-            self.manager.current_screen.ids.GL.add_widget(add)
-            self.manager.current_screen.ids.GL.add_widget(total)
+    def __str__(self) :
+        s = 'Linked data : '
+        p = self.head
+        while p != None :
+            s += str(p.data)+' '
+            p = p.next
+        return s
 
-            ref_dict["add"+str(i+1)]=weakref.ref(add)
-            ref_dict["decrease"+str(i+1)]=weakref.ref(decrease)
-            ref_dict["amt"+str(i+1)]=weakref.ref(amount)
-            ref_dict["total"+str(i+1)]=weakref.ref(total)
-            ref_dict["label"+str(i+1)]=weakref.ref(label)
-            ref_dict["clear"+str(i+1)]=weakref.ref(clear)
-            ref_dict["reset"+str(i+1)]=weakref.ref(reset)
+    def __len__(self) :
+        return self.size
+    
+    def append(self, data):
+        p = self.Node(data)
+        if self.head == None:
+            self.head = self.tail = p
+        else:
+            t = self.tail
+            t.next = p   
+            self.tail =p  
+        self.size += 1
 
-            add.bind(on_press=self.manager.current_screen.adder)
-            decrease.bind(on_press=self.manager.current_screen.decrease)
-            clear.bind(on_press=self.manager.current_screen.remove)
-            reset.bind(on_press=self.manager.current_screen.reset)
+    def removeHead(self) :
+        if self.head == None : return
+        if self.head.next == None :
+            p = self.head
+            self.head = None
+        else :
+            p = self.head
+            self.head = self.head.next
+        self.size -= 1
+        return p.data
+    
+    def isEmpty(self) :
+        return self.size == 0
+    
+    def nodeAt(self,i) :
+        p = self.head
+        for j in range(i) :
+            p = p.next
+        return p
 
-class CategoriesWindow(Screen):
-    def on_kv_post(self, obj):
-        pass
+    def removeIndex(self,i) :
+        if i == 0 :
+            p = self.head
+            self.head = self.head.next
+        else :
+            p = self.nodeAt(i-1)
+            p.next = p.next.next
+        self.size -= 1
+        return p.data
 
-    def adder(self, instance):
-        a = self.get_id(instance)
+class Queue:
+    def __init__(self, list = None):
+        self.items = LinkedList()
+        if list == None:
+            pass
+        else:
+            for i in list:
+                self.enQueue(i)
 
-        # update amount on screen.
-        amt = int(ref_dict["amt"+a]().text)+1
-        ref_dict["amt"+a]().text = str(amt)
+    def __str__(self):
+        if not self.isEmpty():
+            out = 'Queue data : '
+            for i in range(len(self.items)):
+                val = self.items.nodeAt(i).data
+                out += str(val) + ' '
+            return out
+        return 'Empty Queue'
 
-    def decrease(self, instance):
-        a = self.get_id(instance)
+    def __len__(self):
+        return len(self.items)
+
+    def enQueue(self, value):
+        self.items.append(value)
+
+    def deQueue(self):
+        return self.items.removeHead()
+
+    def isEmpty(self):
+        return len(self.items) == 0
+
+    def removeIndex(self, index):
+        if index >= len(self.items):
+            return
+        if index == 0:
+            self.deQueue()
+        else:
+            p = self.items.nodeAt(index - 1)
+            p.next = p.next.next
+            self.items.size -= 1
+
+class Stock:
+    class Category:
+        class Type:
+            class Item:
+                def __init__(self, name, amount, addDate=None):
+                    self.name = name
+                    self.amount = amount
+                    self.remainingExpHour = None
+                    if addDate is None:
+                        self.addDate = datetime.datetime.now()
+                    else:
+                        self.addDate = addDate
+
+            def __init__(self, name, expHour = None, items = None):
+                self.name = name
+                if expHour == None:
+                    self.expHour = None
+                else:
+                    self.expHour = expHour
+                if items == None:
+                    self.items = Queue()
+                else:
+                    self.items = Queue()
+                    for ele in items:
+                        self.items.enQueue(ele)
+            
+            def calculateRemainingExpHour(self, date):
+                remainingExpHour = self.expHour - (datetime.datetime.now() - date).total_seconds()/3600
+                return remainingExpHour
+            
+            def updateRemainingExpHour(self):
+                for i in range(len(self.items)):
+                    self.items.items.nodeAt(i).data.remainingExpHour = self.calculateRemainingExpHour(self.items.items.nodeAt(i).data.addDate)
+
+            def addItem(self, amount , addDate = None):
+                if(addDate is None): 
+                    self.items.enQueue(Stock.Category.Type.Item(self.name, amount))
+                    self.updateRemainingExpHour()
+                else:
+                    self.items.enQueue(Stock.Category.Type.Item(self.name, amount, addDate))
+                    self.updateRemainingExpHour()
+
+            def getItem(self, name):
+                for ele in self.items:
+                    if ele.name == name:
+                        return ele
+                return None
+
+            def printItems(self):
+                if not self.items.isEmpty():
+                    out = 'Items in ' + self.name + ' : '
+                    for i in range(len(self.items)):
+                        val = str(self.items.items.nodeAt(i).data.name) + ' ' + str(self.items.items.nodeAt(i).data.amount)
+                        out += str(val) + ' ' + str(self.items.items.nodeAt(i).data.remainingExpHour) + ' '
+                    return out
+                return 'Empty Category'
+            
+            def getAmount(self):
+                if not self.items.isEmpty():
+                    amount = 0
+                    for i in range(len(self.items)):
+                        amount += self.items.items.nodeAt(i).data.amount
+                return amount
+            
+            def clearItems(self):
+                self.items = Queue()
+            
+            def useItem(self, amount):
+                if not self.items.isEmpty():
+                    if self.getAmount() >= amount:
+                        while amount > 0:
+                            if not self.items.isEmpty():
+                                for i in range(len(self.items)):
+                                    if self.items.items.nodeAt(i).data.amount > amount:
+                                        self.items.items.nodeAt(i).data.amount -= amount
+                                        amount = 0
+                                    else:
+                                        amount -= self.items.items.nodeAt(i).data.amount
+                                        print(f"{self.items.items.nodeAt(i).data.name} {self.items.items.nodeAt(i).data.addDate} out")
+                                        self.items.removeIndex(i)
+                                        break 
+                            else:    
+                                print(f"Stock is Empty")
+                                break
+                    else:
+                        print(f"Not enough")
+                self.updateRemainingExpHour()
+                return None
+            
+        def __init__(self, name, itemType = None):
+            self.name = name
+            if itemType == None:
+                self.type = LinkedList()
+            else:
+                self.type = LinkedList()
+                for ele in type:
+                    self.type.append(self.Type(ele))
         
-        # update amount on screen.
-        if int(ref_dict["amt"+a]().text)>0:
-            amt = int(ref_dict["amt"+a]().text)-1
-            ref_dict["amt"+a]().text = str(amt)
-
-    def remove(self, instance):
-        a = self.get_id(instance)
-        # loop remove widget.
-        for id in ref_dict:
-            if a in id:
-                self.ids.GL.remove_widget(ref_dict[id]())
-
-    def reset(self, instance):
-        print("Reset...")
-
-    def get_id(self, instance):
-        ref_instance = weakref.ref(instance)
-        for id in ref_dict:
-            if ref_instance == ref_dict[id]:
-                return id[-1]
-
-    def back(self):
-        print("Button on click: back")
-        self.ids.GL.clear_widgets()
-        ref_dict.clear()
-
-    def adding_item(self):
-        print("Coding Here...")
+        def addType(self, name, expHour = None, items = None):
+            if items == None:
+                if expHour == None:
+                    self.type.append(self.Type(name))
+                else:
+                    self.type.append(self.Type(name, expHour))
+            else:
+                if expHour == None:
+                    self.type.append(self.Type(name, items))
+                else:
+                    self.type.append(self.Type(name, expHour, items))
         
+        def addNewType(self, name, amount, expHour):
+            self.type.append(self.Type(name, expHour))
+            self.getType(name).addItem(amount)
+
+        def removeType(self, name):
+            for i in range(len(self.type)):
+                if self.type.nodeAt(i).data.name == name:
+                    self.type.removeIndex(i)
+                    break
+
+        def printType(self):
+            if not self.type.isEmpty():
+                out = 'Type : ' + self.name + '\n'
+                for i in range(len(self.type)):
+                    val = '\t\t' + self.type.nodeAt(i).data.printItems()
+                    out += str(val) + ' '
+                return out
+            return 'Empty Type'
+        
+        def getType(self, name):
+            if not self.type.isEmpty():
+                for i in range(len(self.type)):
+                    if self.type.nodeAt(i).data.name== name:
+                        return self.type.nodeAt(i).data
+            return None
+        
+        #funtion to return all the items in the stock sort by remaining exp hour as a object
+        def getDisplayItem(self):
+            if not self.type.isEmpty():
+                items = []
+                for i in range(len(self.type)):
+                    item = []
+                    item.append(self.type.nodeAt(i).data.name)
+                    item.append(self.type.nodeAt(i).data.getAmount())
+                    items.append(item)
+            return items
+
+    def __init__(self, name, category = None):
+        self.name = name
+        if category == None:
+            self.category = LinkedList()
+        else:
+            self.category = LinkedList()
+            for ele in category:
+                self.category.append(self.Category(ele))
+
+    def addCategory(self, name, itemType = None):
+        if type == None:
+            self.category.append(self.Category(name))
+        else:
+            self.category.append(self.Category(name, itemType))
+    
+    def getCategory(self, name):
+        if not self.category.isEmpty():
+            for i in range(len(self.category)):
+                if self.category.nodeAt(i).data.name == name:
+                    return self.category.nodeAt(i).data
+        return None
+    
+    def printCategory(self):
+        if not self.category.isEmpty():
+            out = 'Category : ' + self.name + '\n' 
+            for i in range(len(self.category)):
+                val = '\t' + self.category.nodeAt(i).data.printType()
+                out += str(val) + ' '
+            return out
+        return 'Empty Category'
+
+    #funtion to return all the items in the stock sort by remaining exp hour as a object
+    def getDisplayItem(self):
+        if not self.category.isEmpty():
+            stock = []
+            for i in range(len(self.category)):
+                if not self.category.nodeAt(i).data.type.isEmpty():
+                    for j in range(len(self.category.nodeAt(i).data.type)):
+                        if not self.category.nodeAt(i).data.type.nodeAt(j).data.items.isEmpty():
+                            for k in range(len(self.category.nodeAt(i).data.type.nodeAt(j).data.items)):
+                                item = []
+                                item.append(self.category.nodeAt(i).data.type.nodeAt(j).data.items.items.nodeAt(k).data.name)
+                                item.append(self.category.nodeAt(i).data.type.nodeAt(j).data.items.items.nodeAt(k).data.amount)
+                                item.append(self.category.nodeAt(i).data.type.nodeAt(j).data.items.items.nodeAt(k).data.remainingExpHour)
+                                stock.append(item)
+                        else:
+                            continue
+                else:
+                    continue
+            return stock
+        return None
+    
+
+# def saveStock(stock):
+#     stock_pickle = open('stock.pkl', 'wb')
+#     pickle.dump(stock, stock_pickle)
+#     stock_pickle.close()
+
+# def loadStock():
+#     stock_pickle = open('stock.pkl', 'rb')
+#     stock = pickle.load(stock_pickle)
+#     stock_pickle.close()
+#     return stock
+       
 
 
-class WindowManager(ScreenManager):
-    pass
+# s = Stock('stock1')
+# s.addCategory('Meat')
+#s.getCategory('Meat').addType('pork')
+# s.getCategory('Meat').addNewType('pork',10,24)
+# s.getCategory('Meat').getType('pork').addItem(10)
+# s.getCategory('Meat').getType('pork').addItem(20)
+# s.getCategory('Meat').addNewType('chicken',10,24)
+# s.getCategory('Meat').removeType('chicken')
+# # s.getCategory('Meat').getType('chicken').addItem(30)
+#s.getCategory('Meat').getType('pork').addItem('pork1', 10)
+#print(s.printCategory())
+#print(s.getCategory('Meat').getType('pork').printItems())
+#s.getCategory('Meat').getType('pork').useItem(15)
+#print(s.getCategory('Meat').getType('pork').printItems())
+# print(s.getDisplayItem())
+# print(s.getCategory('Meat').getDisplayItem())
+# saveStock(s)
+# ss = loadStock()
+# print(ss.getDisplayItem())
+# item = []
+# q = []
+    
 
-KV = Builder.load_file("stock.kv")
+# while True:
+#     print("Shabu Stock system")
+#     print("1 | add new item")
+#     print("2 | remove item")
+#     print("3 | In stock")
+#     inp = int(input("Enter choice : "))
 
-class StockApp(App):
-    def build(self):
-        return KV
+#     if inp == 1:
+#         nameItem = input('Enter name item : ')
+#         num = int(input('Enter amount of item : '))
+#         item.append(nameItem)
+#         queue = Queue()
+    
+#         for j in range(num):
+#             queue.enQueue(j)
+#         q.append(queue)    
+#     elif inp == 2:
+#         if len(item) == 0:
+#             print('stock is empty.')
+#         else:
+#             print('>'*10)
+#             for j in range(len(item)):
+#                 print(f'{item[j]} = {q[j]}')
+#             print('>'*10)
 
-if __name__ == "__main__":
-    StockApp().run()
+#             print('1 > add amount of item')
+#             print('2 > dequeue item')
+#             print('3 > delete item')
+#             print('4 > clear item')
+#             print('5 > exit')
+#             inp = int(input('Enter choice: '))
+#             if inp == 1:
+#                 name = input('Enter name item for add amount : ')
+#                 num = int(input('Enter amount : '))
+#                 item.append(nameItem)
+#                 for j in range(num):
+#                     q[index].enQueue(j)
+                
+#                 print('>'*10)
+#                 for j in range(len(item)):
+#                     print(f'{item[j]} = {len(q[j])}')
+#                 print('>'*10)
+                
+#             elif inp == 2:
+#                 name = input('Enter name item for dequeue amount : ')
+#                 num = int(input('Enter amount : '))
+#                 index = item.index(name)
+#                 for j in range(num):
+#                     q[index].deQueue()
+
+#                 print('>'*10)
+#                 for j in range(len(item)):
+#                     print(f'{item[j]} = {q[j]}')
+#                 print('>'*10)
+                
+
+#             elif inp == 3:
+#                 name = input('Enter name item for delete : ')
+#                 index = item.index(name)
+#                 q.pop(index)
+#                 item.pop(index)
+
+#                 print('>'*10)
+#                 for j in range(len(item)):
+#                     print(f'{item[j]} = {len(q[j])}')
+#                 print('>'*10)
+
+#             elif inp == 4:
+#                 name = input('Enter name item for clear : ')
+#                 index = item.index(name)
+#                 while len(q[index]) != 0:
+#                     q[index].deQueue()
+#                 print('>'*10)
+#                 for j in range(len(item)):
+#                     print(f'{item[j]} = {len(q[j])}')
+#                 print('>'*10)
+
+
+#             elif inp == 5:
+#                 pass
+
+#     print('-'*50)
+
+
