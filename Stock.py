@@ -11,13 +11,14 @@ from kivy.uix.label import Label
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.properties import ObjectProperty
 from kivy.config import Config
+from kivy.utils import interpolate
 Config.set('graphics', 'width', '1440')
 Config.set('graphics', 'height', '1024')
 # Config.set('graphics', 'resizable', False)
 
 categories = ['เนื้อสัตว์','ผัก','อาหารทานเล่น','เครื่องดื่ม','ผลไม้','น้ำซุป','ของหวาน', 'น้ำจิ้ม','อื่นๆ', 'New']
 
-Meat = ['Chicken', 'Pork', 'Beef', 'Fish']*100
+ref_dict={}
 
 class Materials:
 
@@ -90,51 +91,58 @@ class AddWindow(Screen):
             self.manager.current_screen.ids.GL.add_widget(add)
             self.manager.current_screen.ids.GL.add_widget(total)
 
+            ref_dict["add"+str(i+1)]=weakref.ref(add)
+            ref_dict["decrease"+str(i+1)]=weakref.ref(decrease)
+            ref_dict["amt"+str(i+1)]=weakref.ref(amount)
+            ref_dict["total"+str(i+1)]=weakref.ref(total)
+            ref_dict["label"+str(i+1)]=weakref.ref(label)
+            ref_dict["clear"+str(i+1)]=weakref.ref(clear)
+            ref_dict["reset"+str(i+1)]=weakref.ref(reset)
+
+            add.bind(on_press=self.manager.current_screen.adder)
+            decrease.bind(on_press=self.manager.current_screen.decrease)
+            clear.bind(on_press=self.manager.current_screen.remove)
+            reset.bind(on_press=self.manager.current_screen.reset)
+
 class CategoriesWindow(Screen):
     def on_kv_post(self, obj):
-        # items = []
-        # with open('meat.txt') as reader:
-        #     for line in reader.readlines():
-        #         items.append(line)
-        # for i in range(len(items)):
-        #     items[i] = items[i].split()
-        # n = math.ceil(len(items)/1)
-        # self.ids.GL.height = (40*(n+1)+50*n) # กำหนดช่วงความสูงของ GridLayout ใน ScrollView
-        # for i in range(len(items)):
-        #     label = Label(text=items[i][0], font_size=24, size_hint_y=None, height=50)
-        #     amount = Label(text=str(0), font_size=24, size_hint_y=None, height=50, size_hint_x=0.1)
-        #     add = Button(text="+", font_size=48, size_hint_y=None, height=50,size_hint_x=0.1)
-        #     decrease = Button(text="-", font_size=48, size_hint_y=None, height=50, size_hint_x=0.1)
-        #     clear = Button(text="C", font_name='fonts/THSarabun Bold.ttf', font_size=24, size_hint_y=None, height=50, size_hint_x=0.1)
-        #     reset = Button(text="R", font_name='fonts/THSarabun Bold.ttf', font_size=24, size_hint_y=None, height=50, size_hint_x=0.1)
-        #     total = Label(text = items[i][1], font_size=24, size_hint_y=None, height=50, size_hint_x=0.1)
-
-            
-        #     # Add widget.
-        #     self.ids.GL.add_widget(clear)
-        #     self.ids.GL.add_widget(reset)
-        #     self.ids.GL.add_widget(label)
-        #     self.ids.GL.add_widget(decrease)
-        #     self.ids.GL.add_widget(amount)
-        #     self.ids.GL.add_widget(add)
-        #     self.ids.GL.add_widget(total)
-    
-        #     self.ids["add"+str(i)] = weakref.ref(add)
-        #     add.bind(on_press=self.adder)
         pass
 
     def adder(self, instance):
-        print(self.get_id(instance))
+        a = self.get_id(instance)
+
+        # update amount on screen.
+        amt = int(ref_dict["amt"+a]().text)+1
+        ref_dict["amt"+a]().text = str(amt)
+
+    def decrease(self, instance):
+        a = self.get_id(instance)
         
+        # update amount on screen.
+        if int(ref_dict["amt"+a]().text)>0:
+            amt = int(ref_dict["amt"+a]().text)-1
+            ref_dict["amt"+a]().text = str(amt)
+
+    def remove(self, instance):
+        a = self.get_id(instance)
+        # loop remove widget.
+        for id in ref_dict:
+            if a in id:
+                self.ids.GL.remove_widget(ref_dict[id]())
+
+    def reset(self, instance):
+        print("Reset...")
 
     def get_id(self, instance):
-        for id, widget in instance.parent.ids.items():
-            if widget.__self__ == instance:
-                return id
+        ref_instance = weakref.ref(instance)
+        for id in ref_dict:
+            if ref_instance == ref_dict[id]:
+                return id[-1]
 
     def back(self):
         print("Button on click: back")
         self.ids.GL.clear_widgets()
+        ref_dict.clear()
 
     def adding_item(self):
         print("Coding Here...")
