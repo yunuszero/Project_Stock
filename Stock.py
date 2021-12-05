@@ -255,6 +255,8 @@ class Stock:
         
         #funtion to return all the items in the stock sort by remaining exp hour as a object
         def getDisplayItem(self):
+            if self.type.isEmpty():
+                return None
             if not self.type.isEmpty():
                 items = []
                 for i in range(len(self.type)):

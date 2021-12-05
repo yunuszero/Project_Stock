@@ -1,3 +1,4 @@
+from os import getlogin
 import kivy
 import math
 import weakref
@@ -24,6 +25,8 @@ ref_dict={}
 
 s = Stock("Stock0")
 
+
+# Temporary stock
 with open('meat.txt') as reader:
     s.addCategory('Meat1')
     for line in reader.readlines():
@@ -31,7 +34,10 @@ with open('meat.txt') as reader:
         b=int(b)
         s.getCategory('Meat1').addNewType(a, b ,24)
 
-print(s.getCategory('Meat1').getDisplayItem()[0])
+def get_len(category):
+    if s.getCategory(category).getDisplayItem() == None:
+        return 0
+    return len(s.getCategory(category).getDisplayItem())
 
 class MainWindow(Screen):
     item = ObjectProperty(None)
@@ -60,17 +66,17 @@ class AddWindow(Screen):
         self.manager.current = 'categories'
         self.manager.current_screen.ids.titleTXT.text = instance.text
 
-        items = []
-        with open('meat.txt') as reader:
-            for line in reader.readlines():
-                items.append(line)
-        for i in range(len(items)):
-            items[i] = items[i].split()
+        # items = []
+        # with open('meat.txt') as reader:
+        #     for line in reader.readlines():
+        #         items.append(line)
+        # for i in range(len(items)):
+        #     items[i] = items[i].split()
 
         # generate widget.
-        n = math.ceil(len(s.getDisplayItem())/1)
+        n = math.ceil(get_len('Meat1')/1)
         self.manager.current_screen.ids.GL.height = (40*(n+1)+70*n) # กำหนดช่วงความสูงของ GridLayout ใน ScrollView
-        for i in range(len(s.getDisplayItem())):
+        for i in range(get_len('Meat1')):
             label = Label(text=s.getCategory('Meat1').getDisplayItem()[i][0], font_size=24, size_hint_y=None, height=70)
             amount = Label(text=str(0), font_size=24, size_hint_y=None, height=70, size_hint_x=0.1)
             add = Button(text="+", font_size=48, size_hint_y=None, height=70, size_hint_x=None, width=70)
@@ -88,13 +94,13 @@ class AddWindow(Screen):
             self.manager.current_screen.ids.GL.add_widget(add)
             self.manager.current_screen.ids.GL.add_widget(total)
 
-            ref_dict["add"+str(i+1)]=weakref.ref(add)
-            ref_dict["decrease"+str(i+1)]=weakref.ref(decrease)
-            ref_dict["amt"+str(i+1)]=weakref.ref(amount)
-            ref_dict["total"+str(i+1)]=weakref.ref(total)
-            ref_dict["label"+str(i+1)]=weakref.ref(label)
-            ref_dict["clear"+str(i+1)]=weakref.ref(clear)
-            ref_dict["reset"+str(i+1)]=weakref.ref(reset)
+            ref_dict["add "+str(i)]=weakref.ref(add)
+            ref_dict["decrease "+str(i)]=weakref.ref(decrease)
+            ref_dict["amt "+str(i)]=weakref.ref(amount)
+            ref_dict["total "+str(i)]=weakref.ref(total)
+            ref_dict["label "+str(i)]=weakref.ref(label)
+            ref_dict["clear "+str(i)]=weakref.ref(clear)
+            ref_dict["reset "+str(i)]=weakref.ref(reset)
 
             add.bind(on_press=self.manager.current_screen.adder)
             decrease.bind(on_press=self.manager.current_screen.decrease)
@@ -112,20 +118,20 @@ class CategoriesWindow(Screen):
         a = self.get_id(instance)
 
         # update amount on screen.
-        amt = int(ref_dict["amt"+a]().text)+1
-        ref_dict["amt"+a]().text = str(amt)
+        amt = int(ref_dict["amt "+a]().text)+1
+        ref_dict["amt "+a]().text = str(amt)
         # update total.
-        ref_dict["total"+a]().text = str(int(s.getCategory('Meat1').getDisplayItem()[int(a)-1][1]) + int(amt))
+        ref_dict["total "+a]().text = str(int(s.getCategory('Meat1').getDisplayItem()[int(a)][1]) + int(amt))
 
     def decrease(self, instance):
         a = self.get_id(instance)
         
         # update amount on screen.
-        if int(ref_dict["amt"+a]().text)>0:
-            amt = int(ref_dict["amt"+a]().text)-1
-            ref_dict["amt"+a]().text = str(amt)
+        if int(ref_dict["amt "+a]().text)>0:
+            amt = int(ref_dict["amt "+a]().text)-1
+            ref_dict["amt "+a]().text = str(amt)
         # update total.
-        ref_dict["total"+a]().text = str(s.getCategory('Meat1').getDisplayItem()[int(a)-1][1] + int(ref_dict["amt"+a]().text))
+        ref_dict["total "+a]().text = str(s.getCategory('Meat1').getDisplayItem()[int(a)][1] + int(ref_dict["amt "+a]().text))
 
     def remove(self, instance):
         a = self.get_id(instance)
@@ -134,25 +140,31 @@ class CategoriesWindow(Screen):
             if a in id:
                 self.ids.GL.remove_widget(ref_dict[id]())
 
-        print(s.printCategory())
-        name = s.getCategory('Meat1').getDisplayItem()[int(a)-1][0]
-        s.getCategory('Meat1').removeType(name)
-        print(s.getCategory('Meat1').printType())
+                # Move Index to replace old weakref\
+                i = id.split()
+                for j in range(int(i[-1]), get_len('Meat1')-1):
+                    ref_dict[i[0]+' '+str(j)] = ref_dict[i[0]+' '+str(j+1)]
 
-        n = math.ceil(len(s.getDisplayItem()))
+        print(ref_dict.keys())
+        # print(s.printCategory())
+        name = s.getCategory('Meat1').getDisplayItem()[int(a)][0]
+        s.getCategory('Meat1').removeType(name)
+        # print(s.getCategory('Meat1').printType())
+
+        n = math.ceil(get_len('Meat1'))
         self.manager.current_screen.ids.GL.height = (40*(n+1)+70*n)
 
     def reset(self, instance):
         a = self.get_id(instance)
 
-        ref_dict["amt"+a]().text = str(0)
-        ref_dict["total"+a]().text = str(s.getCategory('Meat1').getDisplayItem()[int(a)-1][1])
+        ref_dict["amt "+a]().text = str(0)
+        ref_dict["total "+a]().text = str(s.getCategory('Meat1').getDisplayItem()[int(a)][1])
 
     def get_id(self, instance):
         ref_instance = weakref.ref(instance)
         for id in ref_dict:
             if ref_instance == ref_dict[id]:
-                return id[-1]
+                return id.split()[-1]
 
     def back(self):
         print("Button on click: back")
@@ -160,22 +172,63 @@ class CategoriesWindow(Screen):
         ref_dict.clear()
 
     def adding_item(self):
-        print(self.materialsName.text,self.materialsAmount.text,self.materialsExpire.text)
+        # print(self.materialsName.text,self.materialsAmount.text,self.materialsExpire.text)
+        
+        if(self.materialsName.text != '' and self.materialsExpire.text != ''):
+            print(self.materialsName.text,self.materialsAmount.text,self.materialsExpire.text)
+            if self.materialsAmount.text == '': 
+                self.materialsAmount.text = '0'
+            s.getCategory('Meat1').addNewType(self.materialsName.text,int(self.materialsAmount.text) ,int(self.materialsExpire.text))
+
+            label = Label(text=self.materialsName.text, font_size=24, size_hint_y=None, height=70)
+            amount = Label(text=str(0), font_size=24, size_hint_y=None, height=70, size_hint_x=0.1)
+            add = Button(text="+", font_size=48, size_hint_y=None, height=70, size_hint_x=None, width=70)
+            decrease = Button(text="-", font_size=48, size_hint_y=None, height=70, size_hint_x=None, width=70)
+            clear = Button(size_hint_y=None, height=70, size_hint_x=None, width=70, background_normal="bin.png")
+            reset = Button(size_hint_y=None, height=70, size_hint_x=None, width=70, background_normal="reset.png")
+            total = Label(text = self.materialsAmount.text, font_size=24, size_hint_y=None, height=70, size_hint_x=0.1)
+
+            self.ids.GL.add_widget(clear)
+            self.ids.GL.add_widget(reset)
+            self.ids.GL.add_widget(label)
+            self.ids.GL.add_widget(decrease)
+            self.ids.GL.add_widget(amount)
+            self.ids.GL.add_widget(add)
+            self.ids.GL.add_widget(total)
+
+            ref_dict["add "+str(get_len('Meat1')-1)]=weakref.ref(add)
+            ref_dict["decrease "+str(get_len('Meat1')-1)]=weakref.ref(decrease)
+            ref_dict["amt "+str(get_len('Meat1')-1)]=weakref.ref(amount)
+            ref_dict["total "+str(get_len('Meat1')-1)]=weakref.ref(total)
+            ref_dict["label "+str(get_len('Meat1')-1)]=weakref.ref(label)
+            ref_dict["clear "+str(get_len('Meat1')-1)]=weakref.ref(clear)
+            ref_dict["reset "+str(get_len('Meat1')-1)]=weakref.ref(reset)
+
+            add.bind(on_press=self.adder)
+            decrease.bind(on_press=self.decrease)
+            clear.bind(on_press=self.remove)
+            reset.bind(on_press=self.reset)
+
+            n = math.ceil(get_len('Meat1'))
+            self.manager.current_screen.ids.GL.height = (40*(n+1)+70*n)
+
         self.materialsName.text=""
         self.materialsAmount.text=""
         self.materialsExpire.text=""
-        print(s.printCategory())
-        for i in range(1,len(s.getDisplayItem())):
-            item = ref_dict["label"+str(i)]().text
-            amount = ref_dict["amt"+str(i)]().text
-            total = ref_dict["total"+str(i)]().text
+        
+        # Add amount of Items
+        for i in range(get_len('Meat1')):
+            item = ref_dict["label "+str(i)]().text
+            amount = ref_dict["amt "+str(i)]().text
+            total = ref_dict["total "+str(i)]().text
             print(item, amount, total)
             if int(amount)>0:
-                name = s.getCategory('Meat1').getDisplayItem()[i-1][0]
+                name = s.getCategory('Meat1').getDisplayItem()[i][0]
                 s.getCategory('Meat1').getType(name).addItem(int(amount))
-            ref_dict["amt"+str(i)]().text = str(0)
+            ref_dict["amt "+str(i)]().text = str(0)
+
         print("----------------------------------")
-        print(s.printCategory())
+        print(s.getCategory('Meat1').getDisplayItem())
         
 
 
