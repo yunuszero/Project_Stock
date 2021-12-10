@@ -175,6 +175,8 @@ class Stock:
                 return 'Empty Category'
             
             def getAmount(self):
+                if self.items.isEmpty():
+                    return 0
                 if not self.items.isEmpty():
                     amount = 0
                     for i in range(len(self.items)):
@@ -319,17 +321,17 @@ class Stock:
         return None
     
 
-# def saveStock(stock):
-#     stock_pickle = open('stock.pkl', 'wb')
-#     pickle.dump(stock, stock_pickle)
-#     stock_pickle.close()
+def saveStock(stock):
+    stock_pickle = open('stock.pkl', 'wb')
+    pickle.dump(stock, stock_pickle)
+    stock_pickle.close()
 
-# def loadStock():
-#     stock_pickle = open('stock.pkl', 'rb')
-#     stock = pickle.load(stock_pickle)
-#     stock_pickle.close()
-#     return stock
-       
+def loadStock():
+    stock_pickle = open('stock.pkl', 'rb')
+    stock = pickle.load(stock_pickle)
+    stock_pickle.close()
+    return stock
+
 
 
 # s = Stock('stock1')
@@ -437,5 +439,3 @@ class Stock:
 #                 pass
 
 #     print('-'*50)
-
-

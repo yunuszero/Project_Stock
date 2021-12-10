@@ -6,6 +6,8 @@ WindowManager:
     MainWindow:
     AddWindow:
     CategoriesWindow:
+    UseWindow:
+    UseCategoriesWindow:
 
 # declaration part
 
@@ -77,6 +79,9 @@ WindowManager:
                 font_size:36
                 size: 240, 120
                 size_hint: None, None
+                on_release:
+                    root.manager.transition = NoTransition()
+                    app.root.current = "use"
             FloatLayout:
                 
                 RedButton:
@@ -87,15 +92,24 @@ WindowManager:
                     size: 240, 120
                     size_hint: None, None
                     pos_hint:{"right": 1, "top": 1}
-        Label:
-            text: "Output lists of item."
-            canvas.before:
-                Color:
-                    rgba: 0,0,0,0.8
-                RoundedRectangle:
-                    pos: self.pos
-                    size: self.size
-                    radius: [(40, 40), (40, 40), (40, 40), (40, 40)]
+                    on_press: 
+                        root.saveExit(),
+                        app.stop()
+        ScrollView:
+            GridLayout:
+                id: showlists
+                cols:3
+                size_hint_y: None
+                spacing: 40
+                padding:40
+                canvas.before:
+                    Color:
+                        rgba: 0,0,0,0.8
+                    RoundedRectangle:
+                        pos: self.pos
+                        size: self.size
+                        radius: [(40, 40), (40, 40), (40, 40), (40, 40)]
+
         # BoxLayout:
         #     orientation:"horizontal"
         #     size: 490, 120
@@ -158,10 +172,7 @@ WindowManager:
                 text: "ย้อนกลับ"
                 font_name:'fonts/THSarabun Bold.ttf'
                 font_size:36
-                
-                on_release:
-                    root.manager.transition = NoTransition()
-                    app.root.current = "main"
+                on_press: root.back()
 
 <CategoriesWindow>
 # Background Color
@@ -227,6 +238,173 @@ WindowManager:
                 on_release:
                     root.manager.transition = NoTransition()
                     app.root.current = "add"
+                    
+            BoxLayout:
+                orientation: "vertical"
+                size_hint: 0.8, 1
+                pos_hint: {'center_y': 0.75, 'center_x': 0.5}
+                # spacing: 5
+                Label:
+                    text: "ชื่อวัตถุดิบ"
+                    font_name:'fonts/THSarabun Bold.ttf'
+                    font_size: 24
+                    color: 0,0,0,1
+                TextInput:
+                    id: materialsName
+                    hint_text:'Enter materials name.'
+                    font_name:'fonts/THSarabun Bold.ttf'
+                    font_size: 36
+            BoxLayout:
+                orientation: "vertical"
+                size_hint: 0.1, 1
+                pos_hint: {'center_y': 0.75, 'center_x': 0.5}
+                # spacing: 50
+                Label:
+                    text: "amt."
+                    font_name:'fonts/THSarabun Bold.ttf'
+                    font_size: 24
+                    color: 0,0,0,1
+                TextInput:
+                    id: materialsAmount
+                    # hint_text:'Amount.'
+                    font_name:'fonts/THSarabun Bold.ttf'
+                    font_size: 36
+                    # size_hint_y: 0.5
+            BoxLayout:
+                orientation: "vertical"
+                size_hint: 0.1, 1
+                pos_hint: {'center_y': 0.75, 'center_x': 0.5}
+                # spacing: 50
+                Label:
+                    text: "exp.(hr)"
+                    font_name:'fonts/THSarabun Bold.ttf'
+                    font_size: 24
+                    color: 0,0,0,1                
+                TextInput:
+                    id: materialsExpire
+                    # hint_text:'Expire.'
+                    font_name:'fonts/THSarabun Bold.ttf'
+                    font_size: 36
+                    # size_hint_y: 0.5
+            GreenButton:
+                text: "ตกลง"
+                font_name:'fonts/THSarabun Bold.ttf'
+                font_size:36
+                size_hint: 0.2, 1
+                on_press: root.adding_item()
+
+<UseWindow>:
+    name: "use"
+    canvas.before:
+        Color:
+            rgba: 1, 1, 1, 1
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+    BoxLayout:
+        orientation: "vertical"
+        padding: 25
+        spacing: 40
+        Label:
+            text: "ใช้วัตถุดิบ"
+            font_name:'fonts/THSarabun Bold.ttf'
+            font_size:36
+            color: 0,0,0,1
+            size: root.width-50, 120
+            size_hint: None, None
+
+            canvas.before:
+                Color:
+                    rgba: 255,0,0,0.2
+                RoundedRectangle:
+                    pos: self.pos
+                    size: self.size
+                    radius: [(40, 40), (40, 40), (40, 40), (40, 40)]
+        ScrollView:
+            BoxLayout:
+                id:SV
+                orientation:"horizontal"
+                size_hint_y: None
+                spacing: 40
+                GridLayout:
+                    id: BL1
+                    cols:3
+                    spacing: 40 
+        BoxLayout:
+            size: 220, 120
+            size_hint: None, None
+            spacing: 50
+            RedButton:
+                text: "ย้อนกลับ"
+                font_name:'fonts/THSarabun Bold.ttf'
+                font_size:36
+                
+                on_press: root.back()
+
+<UseCategoriesWindow>:
+    name: "usecategories"
+    materialsName: materialsName
+    materialsExpire: materialsExpire
+    materialsAmount: materialsAmount
+    canvas.before:
+        Color:
+            rgba: 1, 1, 1, 1
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+    BoxLayout:
+        orientation: "vertical"
+        padding: 25
+        spacing: 40
+        Label:
+            id: titleTXT
+            text: ""
+            font_name:'fonts/THSarabun Bold.ttf'
+            font_size:36
+            color: 0,0,0,1
+            size: root.width-50, 120
+            size_hint: None, None
+
+            canvas.before:
+                Color:
+                    rgba: 255,0,0,0.2
+                RoundedRectangle:
+                    pos: self.pos
+                    size: self.size
+                    radius: [(40, 40), (40, 40), (40, 40), (40, 40)]
+        
+        ScrollView:
+            GridLayout:
+                id: GL
+                cols: 7
+                size_hint_y: None
+                spacing: 40
+                padding:40
+                canvas.before:
+                    Color:
+                        rgba: 0,0,0,0.8
+                    RoundedRectangle:
+                        pos: self.pos
+                        size: self.size
+                        radius: [(40, 40), (40, 40), (40, 40), (40, 40)]
+
+            
+        BoxLayout:
+            orientation: "horizontal"
+            size: root.width-50, 120
+            size_hint: None, None
+            spacing: 50
+            RedButton:
+                text: "ย้อนกลับ"
+                font_name:'fonts/THSarabun Bold.ttf'
+                font_size:36
+                size_hint_x: 0.2
+                on_press: root.back()
+                on_release:
+                    root.manager.transition = NoTransition()
+                    app.root.current = "use"
                     
             BoxLayout:
                 orientation: "vertical"
