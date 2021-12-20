@@ -1,8 +1,10 @@
 from os import getlogin
 import kivy
+import os
 import math
 import weakref
 import pickle
+from kivy import clock
 from kivy.app import App
 from kivy.uix.behaviors import button
 from kivy.uix.button import Button
@@ -14,6 +16,7 @@ from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.properties import ObjectProperty
 from kivy.config import Config
 from kivy.utils import interpolate
+from kivy.clock import Clock
 from stock import *
 
 categories = ['เนื้อสัตว์','ผัก','อาหารทานเล่น','เครื่องดื่ม','ผลไม้','น้ำซุป','ของหวาน', 'น้ำจิ้ม','อื่นๆ']
@@ -23,6 +26,20 @@ Config.set('graphics', 'width', '1440')
 Config.set('graphics', 'height', '1024')
 # Config.set('graphics', 'resizable', False)
 
+# file_path = 'meat.txt'
+# if os.stat(file_path).st_size == 0:
+#     print('sssss')
+#     print('File is empty')
+#     s = Stock('Stock')
+#     for category in categories:
+#         s.addCategory(category)
+#         print(s.getDisplayItem(),55)
+#     f = open("meat.txt","w")
+#     f.write("is not empty")
+#     f.close()
+# else:
+#     print('File is not empty')
+#     s = loadStock()
 isCreatedStock = False
 isStock_pickle = open('isStock.pkl', 'wb')
 pickle.dump(isCreatedStock, isStock_pickle)
@@ -32,7 +49,6 @@ isStock_pickle = open('stock.pkl', 'rb')
 isCreatedStock = pickle.load(isStock_pickle)
 isStock_pickle.close()
 
-# s = loadStock()
 
 if isCreatedStock:  
     s = loadStock()
@@ -45,6 +61,20 @@ else:
 ref_dict={}
 cat_dict = {}
 
+def bubbleSort(arr):
+    n = len(arr)
+ 
+    # Traverse through all array elements
+    for i in range(n):
+ 
+        # Last i elements are already in place
+        for j in range(0, n-i-1):
+ 
+            # traverse the array from 0 to n-i-1
+            # Swap if the element found is greater
+            # than the next element
+            if arr[j][2] > arr[j+1][2] :
+                arr[j], arr[j+1] = arr[j+1], arr[j]
 # Temporary stock
 # with open('D:/python/5_12_21/meat.txt') as reader:
 #     s.addCategory('Meat1')
@@ -69,20 +99,80 @@ class MainWindow(Screen):
         print('save&exit func...')
     
     def on_kv_post(self, obj):
-        showlists = s.getDisplayItem()
+        for i in categories:
+            if s.getCategory(i).getDisplayItem() != None:
+                for j in range(get_len(i)):
+                    name = s.getCategory(i).getDisplayItem()[j][0]
+                    s.getCategory(i).getType(name).updateRemainingExpHour()
 
+        showlists = s.getDisplayItem()
+        bubbleSort(showlists)
+        print(showlists)
+        showlists.insert(0,["ชื่อวัตถุดิบ","จำนวนคงเหลือ","เวลาคงเหลือ (ชั่วโมง)"])
         n = math.ceil(len(showlists))
+        print("testtttttttttt")
         self.ids.showlists.height = (40*(n+1)+70*n)
         # loop create categories BTN.
+        
+        # label = Label(text=str("ชื่อวัตถุดิบเวลาคงเหลือ"), font_size=24, size_hint_y=None, height=70,font_name='fonts/THSarabun Bold.ttf')
+        # amount = Label(text=str("จำนวนคงเหลือ"), font_size=24, size_hint_y=None, height=70,font_name='fonts/THSarabun Bold.ttf')
+        # expire = Label(text=str("เวลาคงเหลือ"), font_size=24, size_hint_y=None, height=70,font_name='fonts/THSarabun Bold.ttf')
+        # self.ids.showlists.add_widget(label)
+        # self.ids.showlists.add_widget(amount)
+        # self.ids.showlists.add_widget(expire)
+
         for i in range(len(showlists)):
-            label = Label(text=str(showlists[i][0]), font_size=24, size_hint_y=None, height=70,font_name='fonts/THSarabun Bold.ttf')
-            amount = Label(text=str(showlists[i][1]), font_size=24, size_hint_y=None, height=70,font_name='fonts/THSarabun Bold.ttf')
-            expire = Label(text=str(showlists[i][2]), font_size=24, size_hint_y=None, height=70,font_name='fonts/THSarabun Bold.ttf')
+            if showlists[i][2] != "เวลาคงเหลือ (ชั่วโมง)" and float("{:.4f}".format(float(showlists[i][2]))) <= 0:
+                label = Label(text=str(showlists[i][0]), font_size=24, size_hint_y=None, height=70,font_name='fonts/THSarabun Bold.ttf',color=[1,200,200,1])
+                amount = Label(text=str(showlists[i][1]), font_size=24, size_hint_y=None, height=70,font_name='fonts/THSarabun Bold.ttf',color=[1,200,200,1])
+                expire = Label(text='0.0000', font_size=24, size_hint_y=None, height=70,font_name='fonts/THSarabun Bold.ttf',color=[1,200,200,1])
+
+            else:
+                label = Label(text=str(showlists[i][0]), font_size=24, size_hint_y=None, height=70,font_name='fonts/THSarabun Bold.ttf')
+                amount = Label(text=str(showlists[i][1]), font_size=24, size_hint_y=None, height=70,font_name='fonts/THSarabun Bold.ttf')
+                if showlists[i][2] == "เวลาคงเหลือ (ชั่วโมง)" :
+                    expire = Label(text=str(showlists[i][2]), font_size=24, size_hint_y=None, height=70,font_name='fonts/THSarabun Bold.ttf')
+                else:
+                    expire = Label(text=str("{:.4f}".format(float(showlists[i][2]))), font_size=24, size_hint_y=None, height=70,font_name='fonts/THSarabun Bold.ttf')
 
             self.ids.showlists.add_widget(label)
             self.ids.showlists.add_widget(amount)
             self.ids.showlists.add_widget(expire)
+        Clock.schedule_interval(self.refresh,1)
 
+    def refresh(self, *args):
+        print("update realtime")
+        self.ids.showlists.clear_widgets()
+        for i in categories:
+            if s.getCategory(i).getDisplayItem() != None:
+                for j in range(get_len(i)):
+                    name = s.getCategory(i).getDisplayItem()[j][0]
+                    s.getCategory(i).getType(name).updateRemainingExpHour()
+
+        showlists = s.getDisplayItem()
+        bubbleSort(showlists)
+        showlists.insert(0,["ชื่อวัตถุดิบ","จำนวนคงเหลือ","เวลาคงเหลือ (ชั่วโมง)"])
+
+        n = math.ceil(len(showlists))
+        self.ids.showlists.height = (40*(n+1)+70*n)
+
+        for i in range(len(showlists)):
+            if showlists[i][2] != "เวลาคงเหลือ (ชั่วโมง)" and float("{:.4f}".format(float(showlists[i][2]))) <= 0:
+                label = Label(text=str(showlists[i][0]), font_size=24, size_hint_y=None, height=70,font_name='fonts/THSarabun Bold.ttf',color=[1,200,200,1])
+                amount = Label(text=str(showlists[i][1]), font_size=24, size_hint_y=None, height=70,font_name='fonts/THSarabun Bold.ttf',color=[1,200,200,1])
+                expire = Label(text=str("0.0000"), font_size=24, size_hint_y=None, height=70,font_name='fonts/THSarabun Bold.ttf',color=[1,200,200,1])
+
+            else:
+                label = Label(text=str(showlists[i][0]), font_size=24, size_hint_y=None, height=70,font_name='fonts/THSarabun Bold.ttf')
+                amount = Label(text=str(showlists[i][1]), font_size=24, size_hint_y=None, height=70,font_name='fonts/THSarabun Bold.ttf')
+                if showlists[i][2] == "เวลาคงเหลือ (ชั่วโมง)" :
+                    expire = Label(text=str(showlists[i][2]), font_size=24, size_hint_y=None, height=70,font_name='fonts/THSarabun Bold.ttf')
+                else:
+                    expire = Label(text=str("{:.4f}".format(float(showlists[i][2]))), font_size=24, size_hint_y=None, height=70,font_name='fonts/THSarabun Bold.ttf')
+
+            self.ids.showlists.add_widget(label)
+            self.ids.showlists.add_widget(amount)
+            self.ids.showlists.add_widget(expire)
 
 class AddWindow(Screen):
     def on_kv_post(self, obj):
@@ -108,14 +198,25 @@ class AddWindow(Screen):
                     s.getCategory(i).getType(name).updateRemainingExpHour()
 
         showlists = s.getDisplayItem()
+        bubbleSort(showlists)
+        showlists.insert(0,["ชื่อวัตถุดิบ","จำนวนคงเหลือ","เวลาคงเหลือ (ชั่วโมง)"])
 
         n = math.ceil(len(showlists))
         self.manager.current_screen.ids.showlists.height = (40*(n+1)+70*n)
 
         for i in range(len(showlists)):
-            label = Label(text=str(showlists[i][0]), font_size=24, size_hint_y=None, height=70,font_name='fonts/THSarabun Bold.ttf')
-            amount = Label(text=str(showlists[i][1]), font_size=24, size_hint_y=None, height=70,font_name='fonts/THSarabun Bold.ttf')
-            expire = Label(text=str(showlists[i][2]), font_size=24, size_hint_y=None, height=70,font_name='fonts/THSarabun Bold.ttf')
+            if showlists[i][2] != "เวลาคงเหลือ (ชั่วโมง)" and float("{:.4f}".format(float(showlists[i][2]))) <= 0:
+                label = Label(text=str(showlists[i][0]), font_size=24, size_hint_y=None, height=70,font_name='fonts/THSarabun Bold.ttf',color=[1,200,200,1])
+                amount = Label(text=str(showlists[i][1]), font_size=24, size_hint_y=None, height=70,font_name='fonts/THSarabun Bold.ttf',color=[1,200,200,1])
+                expire = Label(text=str("0.0000"), font_size=24, size_hint_y=None, height=70,font_name='fonts/THSarabun Bold.ttf',color=[1,200,200,1])
+
+            else:
+                label = Label(text=str(showlists[i][0]), font_size=24, size_hint_y=None, height=70,font_name='fonts/THSarabun Bold.ttf')
+                amount = Label(text=str(showlists[i][1]), font_size=24, size_hint_y=None, height=70,font_name='fonts/THSarabun Bold.ttf')
+                if showlists[i][2] == "เวลาคงเหลือ (ชั่วโมง)" :
+                    expire = Label(text=str(showlists[i][2]), font_size=24, size_hint_y=None, height=70,font_name='fonts/THSarabun Bold.ttf')
+                else:
+                    expire = Label(text=str("{:.4f}".format(float(showlists[i][2]))), font_size=24, size_hint_y=None, height=70,font_name='fonts/THSarabun Bold.ttf')
 
             self.manager.current_screen.ids.showlists.add_widget(label)
             self.manager.current_screen.ids.showlists.add_widget(amount)
@@ -138,8 +239,25 @@ class AddWindow(Screen):
         #     items[i] = items[i].split()
 
         # generate widget.
-        n = get_len(cat_dict['stayAt'])/1
+        n = get_len(cat_dict['stayAt'])+1/1
         self.manager.current_screen.ids.GL.height = (40*(n+1)+70*n) # กำหนดช่วงความสูงของ GridLayout ใน ScrollView
+        label = Label(text='ชื่อวัตถุดิบ', font_size=24, size_hint_y=None, height=40,font_name='fonts/THSarabun Bold.ttf')
+        amount = Label(text='จำนวน', font_size=24, size_hint_x=0.1, size_hint_y=None, height=40,font_name='fonts/THSarabun Bold.ttf')
+        add = Label(text="", font_size=24, size_hint_y=None, height=40, size_hint_x=None, width=70,font_name='fonts/THSarabun Bold.ttf')
+        decrease = Label(text="", font_size=24, size_hint_y=None, height=40, size_hint_x=None, width=70,font_name='fonts/THSarabun Bold.ttf')
+        clear = Label(text=" ", font_size=24, size_hint_y=None, height=40, size_hint_x=None, width=70,font_name='fonts/THSarabun Bold.ttf')
+        reset = Label(text=" ", font_size=24, size_hint_y=None, height=40, size_hint_x=None, width=70,font_name='fonts/THSarabun Bold.ttf')
+        total = Label(text = str('คงเหลือ'), font_size=24, size_hint_y=None, height=40, size_hint_x=0.1,font_name='fonts/THSarabun Bold.ttf')
+                
+        # Add widget.
+        self.manager.current_screen.ids.GL.add_widget(clear)
+        self.manager.current_screen.ids.GL.add_widget(reset)
+        self.manager.current_screen.ids.GL.add_widget(label)
+        self.manager.current_screen.ids.GL.add_widget(decrease)
+        self.manager.current_screen.ids.GL.add_widget(amount)
+        self.manager.current_screen.ids.GL.add_widget(add)
+        self.manager.current_screen.ids.GL.add_widget(total)
+
         for i in range(get_len(cat_dict['stayAt'])):
             label = Label(text=s.getCategory(cat_dict['stayAt']).getDisplayItem()[i][0], font_size=24, size_hint_y=None, height=70,font_name='fonts/THSarabun Bold.ttf')
             amount = Label(text=str(0), font_size=24, size_hint_y=None, height=70, size_hint_x=0.1)
@@ -215,7 +333,7 @@ class CategoriesWindow(Screen):
         s.getCategory(cat_dict['stayAt']).removeType(name)
         # print(s.getCategory('Meat1').printType())
 
-        n = math.ceil(get_len(cat_dict['stayAt']))
+        n = math.ceil(get_len(cat_dict['stayAt']))+1
         self.manager.current_screen.ids.GL.height = (40*(n+1)+70*n)
 
     def reset(self, instance):
@@ -245,7 +363,7 @@ class CategoriesWindow(Screen):
             print(self.materialsName.text,self.materialsAmount.text,self.materialsExpire.text)
             if self.materialsAmount.text == '': 
                 self.materialsAmount.text = '0'
-            s.getCategory(cat_dict['stayAt']).addNewType(self.materialsName.text,int(self.materialsAmount.text) ,int(self.materialsExpire.text))
+            s.getCategory(cat_dict['stayAt']).addNewType(self.materialsName.text,int(self.materialsAmount.text) ,float(self.materialsExpire.text))
 
             label = Label(text=self.materialsName.text, font_size=24, size_hint_y=None, height=70,font_name='fonts/THSarabun Bold.ttf')
             amount = Label(text=str(0), font_size=24, size_hint_y=None, height=70, size_hint_x=0.1)
@@ -276,7 +394,7 @@ class CategoriesWindow(Screen):
             clear.bind(on_press=self.remove)
             reset.bind(on_press=self.reset)
 
-            n = math.ceil(get_len(cat_dict['stayAt']))
+            n = math.ceil(get_len(cat_dict['stayAt']))+1
             self.manager.current_screen.ids.GL.height = (40*(n+1)+70*n)
 
         self.materialsName.text=""
@@ -291,6 +409,7 @@ class CategoriesWindow(Screen):
             print(item, amount, total)
             if int(total) == 0 and int(amount) == 0:
                 name = s.getCategory(cat_dict['stayAt']).getDisplayItem()[i][0]
+                print(name)
                 s.getCategory(cat_dict['stayAt']).getType(name).clearItems()
             if int(amount)>0:
                 name = s.getCategory(cat_dict['stayAt']).getDisplayItem()[i][0]
@@ -329,8 +448,26 @@ class UseWindow(Screen):
         #     items[i] = items[i].split()
 
         # generate widget.
-        n = get_len(cat_dict['stayAt'])/1
+        n = get_len(cat_dict['stayAt'])+1/1
         self.manager.current_screen.ids.GL.height = (40*(n+1)+70*n) # กำหนดช่วงความสูงของ GridLayout ใน ScrollView
+        
+        label = Label(text='ชื่อวัตถุดิบ', font_size=24, size_hint_y=None, height=40,font_name='fonts/THSarabun Bold.ttf')
+        amount = Label(text='จำนวน', font_size=24, size_hint_x=0.1, size_hint_y=None, height=40,font_name='fonts/THSarabun Bold.ttf')
+        add = Label(text="", font_size=24, size_hint_y=None, height=40, size_hint_x=None, width=70,font_name='fonts/THSarabun Bold.ttf')
+        decrease = Label(text="", font_size=24, size_hint_y=None, height=40, size_hint_x=None, width=70,font_name='fonts/THSarabun Bold.ttf')
+        clear = Label(text=" ", font_size=24, size_hint_y=None, height=40, size_hint_x=None, width=70,font_name='fonts/THSarabun Bold.ttf')
+        reset = Label(text=" ", font_size=24, size_hint_y=None, height=40, size_hint_x=None, width=70,font_name='fonts/THSarabun Bold.ttf')
+        total = Label(text = str('คงเหลือ'), font_size=24, size_hint_y=None, height=40, size_hint_x=0.1,font_name='fonts/THSarabun Bold.ttf')
+                
+        # Add widget.
+        self.manager.current_screen.ids.GL.add_widget(clear)
+        self.manager.current_screen.ids.GL.add_widget(reset)
+        self.manager.current_screen.ids.GL.add_widget(label)
+        self.manager.current_screen.ids.GL.add_widget(decrease)
+        self.manager.current_screen.ids.GL.add_widget(amount)
+        self.manager.current_screen.ids.GL.add_widget(add)
+        self.manager.current_screen.ids.GL.add_widget(total)
+        
         for i in range(get_len(cat_dict['stayAt'])):
             label = Label(text=s.getCategory(cat_dict['stayAt']).getDisplayItem()[i][0], font_size=24, size_hint_y=None, height=70,font_name='fonts/THSarabun Bold.ttf')
             amount = Label(text=str(0), font_size=24, size_hint_y=None, height=70, size_hint_x=0.1)
@@ -374,23 +511,31 @@ class UseWindow(Screen):
                     s.getCategory(i).getType(name).updateRemainingExpHour()
 
         showlists = s.getDisplayItem()
+        bubbleSort(showlists)
+        showlists.insert(0,["ชื่อวัตถุดิบ","จำนวนคงเหลือ","เวลาคงเหลือ (ชั่วโมง)"])
 
         n = math.ceil(len(showlists))
         self.manager.current_screen.ids.showlists.height = (40*(n+1)+70*n)
 
         for i in range(len(showlists)):
-            label = Label(text=str(showlists[i][0]), font_size=24, size_hint_y=None, height=70,font_name='fonts/THSarabun Bold.ttf')
-            amount = Label(text=str(showlists[i][1]), font_size=24, size_hint_y=None, height=70,font_name='fonts/THSarabun Bold.ttf')
-            expire = Label(text=str(showlists[i][2]), font_size=24, size_hint_y=None, height=70,font_name='fonts/THSarabun Bold.ttf')
+            if showlists[i][2] != "เวลาคงเหลือ (ชั่วโมง)" and float("{:.4f}".format(float(showlists[i][2]))) <= 0:
+                label = Label(text=str(showlists[i][0]), font_size=24, size_hint_y=None, height=70,font_name='fonts/THSarabun Bold.ttf',color=[1,200,200,1])
+                amount = Label(text=str(showlists[i][1]), font_size=24, size_hint_y=None, height=70,font_name='fonts/THSarabun Bold.ttf',color=[1,200,200,1])
+                expire = Label(text=str('0.0000'), font_size=24, size_hint_y=None, height=70,font_name='fonts/THSarabun Bold.ttf',color=[1,200,200,1])
+
+            else:
+                label = Label(text=str(showlists[i][0]), font_size=24, size_hint_y=None, height=70,font_name='fonts/THSarabun Bold.ttf')
+                amount = Label(text=str(showlists[i][1]), font_size=24, size_hint_y=None, height=70,font_name='fonts/THSarabun Bold.ttf')
+                if showlists[i][2] == "เวลาคงเหลือ (ชั่วโมง)" :
+                    expire = Label(text=str(showlists[i][2]), font_size=24, size_hint_y=None, height=70,font_name='fonts/THSarabun Bold.ttf')
+                else:
+                    expire = Label(text=str("{:.4f}".format(float(showlists[i][2]))), font_size=24, size_hint_y=None, height=70,font_name='fonts/THSarabun Bold.ttf')
 
             self.manager.current_screen.ids.showlists.add_widget(label)
             self.manager.current_screen.ids.showlists.add_widget(amount)
             self.manager.current_screen.ids.showlists.add_widget(expire)
 
 class UseCategoriesWindow(Screen):
-    fmaterialsName = ObjectProperty(None)
-    fmaterialsAmount = ObjectProperty(None)
-    fmaterialsExpire = ObjectProperty(None)
     def on_kv_post(self, obj):
         pass
 
@@ -425,15 +570,16 @@ class UseCategoriesWindow(Screen):
                 i = id.split()
                 for j in range(int(i[-1]), get_len(cat_dict['stayAt'])-1):
                     ref_dict[i[0]+' '+str(j)] = ref_dict[i[0]+' '+str(j+1)]
-
+        print(s.getDisplayItem())
         print(ref_dict.keys())
         # print(s.printCategory())
         name = s.getCategory(cat_dict['stayAt']).getDisplayItem()[int(a)][0]
         s.getCategory(cat_dict['stayAt']).removeType(name)
         # print(s.getCategory('Meat1').printType())
 
-        n = math.ceil(get_len(cat_dict['stayAt']))
+        n = math.ceil(get_len(cat_dict['stayAt']))+1
         self.manager.current_screen.ids.GL.height = (40*(n+1)+70*n)
+        print(s.getDisplayItem())
 
     def reset(self, instance):
         a = self.get_id(instance)
@@ -451,55 +597,8 @@ class UseCategoriesWindow(Screen):
         print("Button on click: back")
         self.ids.GL.clear_widgets()
         ref_dict.clear()
-        self.materialsName.text=""
-        self.materialsAmount.text=""
-        self.materialsExpire.text=""
 
-    def adding_item(self):
-        # print(self.materialsName.text,self.materialsAmount.text,self.materialsExpire.text)
-        
-        if(self.materialsName.text != '' and self.materialsExpire.text != ''):
-            print(self.materialsName.text,self.materialsAmount.text,self.materialsExpire.text)
-            if self.materialsAmount.text == '': 
-                self.materialsAmount.text = '0'
-            s.getCategory(cat_dict['stayAt']).addNewType(self.materialsName.text,int(self.materialsAmount.text) ,int(self.materialsExpire.text))
-
-            label = Label(text=self.materialsName.text, font_size=24, size_hint_y=None, height=70,font_name='fonts/THSarabun Bold.ttf')
-            amount = Label(text=str(0), font_size=24, size_hint_y=None, height=70, size_hint_x=0.1)
-            add = Button(text="+", font_size=48, size_hint_y=None, height=70, size_hint_x=None, width=70)
-            decrease = Button(text="-", font_size=48, size_hint_y=None, height=70, size_hint_x=None, width=70)
-            clear = Button(size_hint_y=None, height=70, size_hint_x=None, width=70, background_normal="bin.png")
-            reset = Button(size_hint_y=None, height=70, size_hint_x=None, width=70, background_normal="reset.png")
-            total = Label(text = self.materialsAmount.text, font_size=24, size_hint_y=None, height=70, size_hint_x=0.1)
-
-            self.ids.GL.add_widget(clear)
-            self.ids.GL.add_widget(reset)
-            self.ids.GL.add_widget(label)
-            self.ids.GL.add_widget(decrease)
-            self.ids.GL.add_widget(amount)
-            self.ids.GL.add_widget(add)
-            self.ids.GL.add_widget(total)
-
-            ref_dict["add "+str(get_len(cat_dict['stayAt'])-1)]=weakref.ref(add)
-            ref_dict["decrease "+str(get_len(cat_dict['stayAt'])-1)]=weakref.ref(decrease)
-            ref_dict["amt "+str(get_len(cat_dict['stayAt'])-1)]=weakref.ref(amount)
-            ref_dict["total "+str(get_len(cat_dict['stayAt'])-1)]=weakref.ref(total)
-            ref_dict["label "+str(get_len(cat_dict['stayAt'])-1)]=weakref.ref(label)
-            ref_dict["clear "+str(get_len(cat_dict['stayAt'])-1)]=weakref.ref(clear)
-            ref_dict["reset "+str(get_len(cat_dict['stayAt'])-1)]=weakref.ref(reset)
-
-            add.bind(on_press=self.adder)
-            decrease.bind(on_press=self.decrease)
-            clear.bind(on_press=self.remove)
-            reset.bind(on_press=self.reset)
-
-            n = math.ceil(get_len(cat_dict['stayAt']))
-            self.manager.current_screen.ids.GL.height = (40*(n+1)+70*n)
-
-        self.materialsName.text=""
-        self.materialsAmount.text=""
-        self.materialsExpire.text=""
-        
+    def using_item(self):
         # Add amount of Items
         for i in range(get_len(cat_dict['stayAt'])):
             item = ref_dict["label "+str(i)]().text

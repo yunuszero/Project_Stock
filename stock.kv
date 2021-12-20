@@ -95,6 +95,7 @@ WindowManager:
                     on_press: 
                         root.saveExit(),
                         app.stop()
+
         ScrollView:
             GridLayout:
                 id: showlists
@@ -344,9 +345,6 @@ WindowManager:
 
 <UseCategoriesWindow>:
     name: "usecategories"
-    materialsName: materialsName
-    materialsExpire: materialsExpire
-    materialsAmount: materialsAmount
     canvas.before:
         Color:
             rgba: 1, 1, 1, 1
@@ -415,12 +413,7 @@ WindowManager:
                     text: "ชื่อวัตถุดิบ"
                     font_name:'fonts/THSarabun Bold.ttf'
                     font_size: 24
-                    color: 0,0,0,1
-                TextInput:
-                    id: materialsName
-                    hint_text:'Enter materials name.'
-                    font_name:'fonts/THSarabun Bold.ttf'
-                    font_size: 36
+                    color: 0,0,0,0
             BoxLayout:
                 orientation: "vertical"
                 size_hint: 0.1, 1
@@ -430,13 +423,7 @@ WindowManager:
                     text: "amt."
                     font_name:'fonts/THSarabun Bold.ttf'
                     font_size: 24
-                    color: 0,0,0,1
-                TextInput:
-                    id: materialsAmount
-                    # hint_text:'Amount.'
-                    font_name:'fonts/THSarabun Bold.ttf'
-                    font_size: 36
-                    # size_hint_y: 0.5
+                    color: 0,0,0,0
             BoxLayout:
                 orientation: "vertical"
                 size_hint: 0.1, 1
@@ -446,16 +433,12 @@ WindowManager:
                     text: "exp.(hr)"
                     font_name:'fonts/THSarabun Bold.ttf'
                     font_size: 24
-                    color: 0,0,0,1                
-                TextInput:
-                    id: materialsExpire
-                    # hint_text:'Expire.'
-                    font_name:'fonts/THSarabun Bold.ttf'
-                    font_size: 36
-                    # size_hint_y: 0.5
+                    color: 0,0,0,0               
+                
+
             GreenButton:
                 text: "ตกลง"
                 font_name:'fonts/THSarabun Bold.ttf'
                 font_size:36
                 size_hint: 0.2, 1
-                on_press: root.adding_item()
+                on_press: root.using_item()

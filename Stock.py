@@ -71,6 +71,10 @@ class LinkedList:
         if i == 0 :
             p = self.head
             self.head = self.head.next
+        elif i == self.size - 1 :
+            p = self.tail
+            self.tail = self.nodeAt(i-1)
+            self.tail.next = None
         else :
             p = self.nodeAt(i-1)
             p.next = p.next.next
