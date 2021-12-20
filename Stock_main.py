@@ -25,17 +25,16 @@ categories = ['เนื้อสัตว์','ผัก','อาหารท�
 Config.set('graphics', 'width', '1440')
 Config.set('graphics', 'height', '1024')
 
-isCreatedStock = False
-isStock_pickle = open('isStock.pkl', 'wb')
-pickle.dump(isCreatedStock, isStock_pickle)
-isStock_pickle.close()
 
-isStock_pickle = open('stock.pkl', 'rb')
-isCreatedStock = pickle.load(isStock_pickle)
-isStock_pickle.close()
+filesize = os.path.getsize("stock.pkl")
+if filesize == 0:
+    print(filesize,"print(filesize)1111")
+    isCreatedStock = False
+else:
+    print(filesize,"print(filesize)2222")
+    isCreatedStock = True
 
-
-if isCreatedStock:  
+if isCreatedStock:
     s = loadStock()
 else:
     s = Stock('Stock')
