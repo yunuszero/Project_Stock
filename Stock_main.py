@@ -24,22 +24,7 @@ categories = ['เนื้อสัตว์','ผัก','อาหารท�
 
 Config.set('graphics', 'width', '1440')
 Config.set('graphics', 'height', '1024')
-# Config.set('graphics', 'resizable', False)
 
-# file_path = 'meat.txt'
-# if os.stat(file_path).st_size == 0:
-#     print('sssss')
-#     print('File is empty')
-#     s = Stock('Stock')
-#     for category in categories:
-#         s.addCategory(category)
-#         print(s.getDisplayItem(),55)
-#     f = open("meat.txt","w")
-#     f.write("is not empty")
-#     f.close()
-# else:
-#     print('File is not empty')
-#     s = loadStock()
 isCreatedStock = False
 isStock_pickle = open('isStock.pkl', 'wb')
 pickle.dump(isCreatedStock, isStock_pickle)
@@ -75,13 +60,6 @@ def bubbleSort(arr):
             # than the next element
             if arr[j][2] > arr[j+1][2] :
                 arr[j], arr[j+1] = arr[j+1], arr[j]
-# Temporary stock
-# with open('D:/python/5_12_21/meat.txt') as reader:
-#     s.addCategory('Meat1')
-#     for line in reader.readlines():
-#         a, b = line.split()
-#         b=int(b)
-#         s.getCategory('Meat1').addNewType(a, b ,24)
 
 def get_len(category):
     if s.getCategory(category).getDisplayItem() == None:
@@ -112,14 +90,6 @@ class MainWindow(Screen):
         n = math.ceil(len(showlists))
         print("testtttttttttt")
         self.ids.showlists.height = (40*(n+1)+70*n)
-        # loop create categories BTN.
-        
-        # label = Label(text=str("ชื่อวัตถุดิบเวลาคงเหลือ"), font_size=24, size_hint_y=None, height=70,font_name='fonts/THSarabun Bold.ttf')
-        # amount = Label(text=str("จำนวนคงเหลือ"), font_size=24, size_hint_y=None, height=70,font_name='fonts/THSarabun Bold.ttf')
-        # expire = Label(text=str("เวลาคงเหลือ"), font_size=24, size_hint_y=None, height=70,font_name='fonts/THSarabun Bold.ttf')
-        # self.ids.showlists.add_widget(label)
-        # self.ids.showlists.add_widget(amount)
-        # self.ids.showlists.add_widget(expire)
 
         for i in range(len(showlists)):
             if showlists[i][2] != "เวลาคงเหลือ (ชั่วโมง)" and float("{:.4f}".format(float(showlists[i][2]))) <= 0:
@@ -230,13 +200,6 @@ class AddWindow(Screen):
         # print(instance.text)
         self.manager.current = 'categories'
         self.manager.current_screen.ids.titleTXT.text = instance.text
-
-        # items = []
-        # with open('meat.txt') as reader:
-        #     for line in reader.readlines():
-        #         items.append(line)
-        # for i in range(len(items)):
-        #     items[i] = items[i].split()
 
         # generate widget.
         n = get_len(cat_dict['stayAt'])+1/1
@@ -427,10 +390,8 @@ class UseWindow(Screen):
         for i in range(len(categories)):
             button = Button(text=categories[i], font_name='fonts/THSarabun Bold.ttf', font_size = 36, size_hint_y = None, height = 190)
             button.bind(on_press=self.pressed)
+            
             self.ids[categories[i]] = weakref.ref(button)
-            # with self.ids[categories[i]].canvas.before:
-            #     Color(rgba=(0,0,0,0.3))
-            #     RoundedRectangle(size=(1310/3, 190),pos=button.pos, radius = [(40, 40), (40, 40), (40, 40), (40, 40)])
             self.ids.BL1.add_widget(button)
 
     def pressed(self, instance):
@@ -439,13 +400,6 @@ class UseWindow(Screen):
         # print(instance.text)
         self.manager.current = 'usecategories'
         self.manager.current_screen.ids.titleTXT.text = instance.text
-
-        # items = []
-        # with open('meat.txt') as reader:
-        #     for line in reader.readlines():
-        #         items.append(line)
-        # for i in range(len(items)):
-        #     items[i] = items[i].split()
 
         # generate widget.
         n = get_len(cat_dict['stayAt'])+1/1
